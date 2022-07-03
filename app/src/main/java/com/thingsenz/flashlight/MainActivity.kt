@@ -1,11 +1,14 @@
 package com.thingsenz.flashlight
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.style.ClickableSpan
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -14,9 +17,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -25,9 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,8 +50,9 @@ class MainActivity : ComponentActivity() {
     private var sosInterrupt = false
     private var btnColor = mutableStateOf(Color.Red)
     private var btnText = mutableStateOf("OFF")
-    var openDialog = mutableStateOf(false)
-    var msgType = mutableStateOf(0)
+    private var openPermDialog = mutableStateOf(false)
+    private var openInfoDialog = mutableStateOf(false)
+    private var msgType = mutableStateOf(0)
     private var cameraId = ""
     private var flashMode = false
     private var hasFlash = true
@@ -59,7 +66,7 @@ class MainActivity : ComponentActivity() {
             } else {
                 msgType.value=1
             }
-            openDialog.value=true
+            openPermDialog.value=true
         }
     }
 
@@ -74,11 +81,11 @@ class MainActivity : ComponentActivity() {
             FlashlightTheme {
                 // A surface container using the 'background' color from the theme
                 Scaffold(topBar = {
-                    TopAppBar(title = {Text(text = "Flashlight",color = MaterialTheme.colors.secondary)},actions = {
+                    TopAppBar(title = {Text(text = "Flashlight",color = MaterialTheme.colors.secondary)},backgroundColor = if (isSystemInDarkTheme()) Color.Black else Color.White,actions = {
                         Row(modifier = Modifier.padding(end = 16.dp)) {
                             Spacer(modifier = Modifier.width(16.dp))
-                            IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-                                .then(Modifier.size(50.dp))
+                            IconButton(onClick = { openInfoDialog.value=true }, modifier = Modifier
+                                .then(Modifier.size(40.dp))
                                 .border(1.dp, MaterialTheme.colors.secondary, shape = CircleShape)) {
                                 Icon(Icons.Default.Info, contentDescription = "Info")
                             }
@@ -102,8 +109,11 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Text(text = btnText.value,style = TextStyle(color = btnColor.value,fontSize = 18.sp),maxLines = 1)
                             }
-                            if (openDialog.value) {
+                            if (openPermDialog.value) {
                                 showPermDialog()
+                            }
+                            if (openInfoDialog.value) {
+                                showInfoDialog()
                             }
                         }
                     }
@@ -155,6 +165,10 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             Log.e("Flashlight",e.message?: "")
         }
+    }
+
+    override fun onBackPressed() {
+        finish()
     }
 
     override fun finish() {
@@ -215,16 +229,52 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(top = 10.dp)
                             .background(MaterialTheme.colors.background)) {
-                        TextButton(onClick = { openDialog.value=false
+                        TextButton(onClick = { openPermDialog.value=false
                             finish()
                         }) {
                             Text(text = "Deny",fontWeight = FontWeight.SemiBold,color = Color.Blue,modifier = Modifier.padding(top = 5.dp,bottom = 5.dp))
                         }
                         TextButton(onClick = {
-                            openDialog.value=false
+                            openPermDialog.value=false
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         },enabled = msgType.value==0) {
                             Text(text = "Allow",fontWeight = FontWeight.SemiBold,color = if (msgType.value==0) Color.Blue else Color.Gray,modifier = Modifier.padding(top = 5.dp,bottom = 5.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun showInfoDialog() {
+        Dialog(onDismissRequest = {  }) {
+            Card(shape = RoundedCornerShape(10.dp),modifier = Modifier.padding(10.dp,5.dp,10.dp,10.dp),elevation = 10.dp) {
+                Column(modifier = Modifier.background(MaterialTheme.colors.background)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = "About", textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(5.dp)
+                                .fillMaxWidth(),style = MaterialTheme.typography.subtitle1,
+                            overflow = TextOverflow.Ellipsis)
+                        Text(text = buildAnnotatedString {
+                            append("Flashlight\n\n")
+                            append("Version: ${BuildConfig.VERSION_NAME}\n")
+                        })
+                        ClickableText(text = AnnotatedString(text = "Code Repository",spanStyle = SpanStyle(color = Color.Blue,textDecoration = TextDecoration.Underline)), onClick = {
+                            startActivity(Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/JohnX4321/Compose_Flashlight")
+                            ))
+                        })
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp)
+                            .background(MaterialTheme.colors.background)) {
+                        TextButton(onClick = { openInfoDialog.value=false
+                        }) {
+                            Text(text = "Close",fontWeight = FontWeight.SemiBold,color = Color.Blue,modifier = Modifier.padding(top = 5.dp,bottom = 5.dp))
                         }
                     }
                 }
