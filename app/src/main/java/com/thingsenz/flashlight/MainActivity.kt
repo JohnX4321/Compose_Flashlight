@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                             IconButton(onClick = { openInfoDialog.value=true }, modifier = Modifier
                                 .then(Modifier.size(40.dp))
                                 .border(1.dp, MaterialTheme.colors.secondary, shape = CircleShape)) {
-                                Icon(Icons.Default.Info, contentDescription = "Info")
+                                Icon(Icons.Default.Info, contentDescription = "Info",tint = MaterialTheme.colors.secondary)
                             }
                         }
                     })
@@ -101,7 +101,8 @@ class MainActivity : ComponentActivity() {
                                 onClick = { try {
                                     toggleFlash()
                                 } catch (e: Exception) {
-                                    Log.e("Flashlight",e.message?: "")
+                                    Toast.makeText(this@MainActivity,"An Unknown Error occurred. Kindly operate through device Flashlight feature",Toast.LENGTH_LONG).show()
+                                    Log.e("MainActivity",e.message?: "")
                                 } },
                                 modifier = Modifier.size(100.dp),
                                 shape = CircleShape,
@@ -147,7 +148,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun toggleFlash() {
-        try {
             if (!hasFlash) {
                 Toast.makeText(this,"Selected Camera does not support Flash",Toast.LENGTH_SHORT).show()
                 return
@@ -162,9 +162,6 @@ class MainActivity : ComponentActivity() {
                 true
             }
             cameraManager?.setTorchMode(cameraId, flashMode)
-        } catch (e: Exception) {
-            Log.e("Flashlight",e.message?: "")
-        }
     }
 
     override fun onBackPressed() {

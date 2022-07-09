@@ -10,8 +10,7 @@ android {
         applicationId "com.thingsenz.flashlight"
         minSdk 23
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        resConfigs "en"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -21,7 +20,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
