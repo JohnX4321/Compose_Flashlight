@@ -180,11 +180,50 @@ class MainActivity : ComponentActivity() {
             sosInterrupt=false
             sosThread=Thread {
                 while (!sosInterrupt) {
-                    toggleFlash()
                     try {
+                        if (flashMode)
+                            toggleFlash()
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
                         Thread.sleep(1000L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(1000L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(1000L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
+                        Thread.sleep(250L)
+                        toggleFlash()
                     } catch (e: Exception) {
-
+                        try {
+                            if (flashMode)
+                                toggleFlash()
+                        } catch (ignored: Exception) {}
+                        Log.e("Flashlight",e.message?: "")
                     }
                 }
             }
@@ -218,8 +257,8 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .padding(5.dp)
                                 .fillMaxWidth(),style = MaterialTheme.typography.subtitle1,
-                            overflow = TextOverflow.Ellipsis)
-                        Text(text = if (msgType.value==0) "Camera Permission is required to use Flashlight. Clicking allow will request for permission again. Clicking Deny will close the app" else "Camera permission is required to use flashlight. Please grant from settings. Clicking Deny will close the app")
+                            overflow = TextOverflow.Ellipsis, color = if (isSystemInDarkTheme()) Color.White else Color.Black)
+                        Text(text = if (msgType.value==0) "Camera Permission is required to use Flashlight. Clicking allow will request for permission again. Clicking Deny will close the app" else "Camera permission is required to use flashlight. Please grant from settings. Clicking Deny will close the app", color = if (isSystemInDarkTheme()) Color.White else Color.Black)
                     }
                     Row(
                         Modifier
