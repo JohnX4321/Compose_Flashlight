@@ -2,13 +2,10 @@ package com.thingsenz.flashlight
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.text.style.ClickableSpan
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -30,7 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.thingsenz.flashlight.ui.theme.FlashlightTheme
 
 class MainActivity : ComponentActivity() {
@@ -124,7 +123,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             if (openInfoDialog.value) {
-                                showInfoDialog()
+                                ShowInfoDialog()
                             }
                         }
                     }
@@ -172,10 +171,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun finish() {
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP)
-            finishAndRemoveTask()
-        else
-            super.finish()
+        finishAndRemoveTask()
     }
 
     private fun sosMode() {
@@ -261,7 +257,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun showPermDialog() {
+    fun ShowPermDialog() {
         Dialog(onDismissRequest = {  }) {
             Card(shape = RoundedCornerShape(10.dp),modifier = Modifier.padding(10.dp,5.dp,10.dp,10.dp),elevation = 10.dp) {
                 Column(modifier = Modifier.background(MaterialTheme.colors.background)) {
@@ -296,7 +292,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun showInfoDialog() {
+    fun ShowInfoDialog() {
         Dialog(onDismissRequest = {  }) {
             Card(shape = RoundedCornerShape(10.dp),modifier = Modifier.padding(10.dp,5.dp,10.dp,10.dp),elevation = 10.dp) {
                 Column(modifier = Modifier.background(MaterialTheme.colors.background)) {
