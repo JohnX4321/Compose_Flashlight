@@ -222,6 +222,7 @@ class MainActivity : ComponentActivity() {
                         toggleFlash()
                         Thread.sleep(250L)
                         toggleFlash()
+                        Thread.sleep(500L)
                     } catch (e: Exception) {
                         try {
                             if (flashMode)
