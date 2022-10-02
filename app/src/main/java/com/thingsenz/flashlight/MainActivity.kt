@@ -47,9 +47,10 @@ class MainActivity : ComponentActivity() {
 
     private var cameraManager: CameraManager? = null
     private var sosThread: Thread? = null
-    private var sosInterrupt = false
+    private var sosInterrupt = true
     private var btnColor = mutableStateOf(Color.Red)
     private var btnText = mutableStateOf("OFF")
+    private var sosColor = mutableStateOf(Color.Red)
     private var openPermDialog = mutableStateOf(false)
     private var openInfoDialog = mutableStateOf(false)
     private var msgType = mutableStateOf(0)
@@ -72,11 +73,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED) {
-            initCamera()
-        } else {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }
+        initCamera()
         setContent {
             FlashlightTheme {
                 // A surface container using the 'background' color from the theme
@@ -99,6 +96,9 @@ class MainActivity : ComponentActivity() {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround,modifier = Modifier.fillMaxHeight()) {
                             OutlinedButton(
                                 onClick = { try {
+                                    if (!sosInterrupt) {
+                                        sosMode()
+                                    }
                                     toggleFlash()
                                 } catch (e: Exception) {
                                     Toast.makeText(this@MainActivity,"An Unknown Error occurred. Kindly operate through device Flashlight feature",Toast.LENGTH_LONG).show()
@@ -110,9 +110,19 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Text(text = btnText.value,style = TextStyle(color = btnColor.value,fontSize = 18.sp),maxLines = 1)
                             }
-                            if (openPermDialog.value) {
-                                showPermDialog()
+                            OutlinedButton(
+                                onClick = { try {
+                                    sosMode()
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity",e.message?: "")
+                                } },
+                                modifier = Modifier.size(100.dp),
+                                shape = CircleShape,
+                                border = BorderStroke(1.dp, sosColor.value)
+                            ) {
+                                Text(text = "SOS",style = TextStyle(color = sosColor.value,fontSize = 18.sp),maxLines = 1)
                             }
+
                             if (openInfoDialog.value) {
                                 showInfoDialog()
                             }
@@ -125,18 +135,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initCamera() {
-       /* cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            Log.d("FL","Binding")
-            val preview = androidx.camera.core.Preview.Builder().build()
-            val camSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build()
-            val imageCapture = ImageCapture.Builder()
-                .setFlashMode(flashMode).build()
-            cameraProviderFuture.get().unbindAll()
-            camera = cameraProviderFuture.get().bindToLifecycle(this,camSelector,preview,imageCapture)
-            Log.d("FL","Done")
-        },ContextCompat.getMainExecutor(this))*/
         if (cameraManager==null)
             cameraManager = getSystemService(CameraManager::class.java)
         cameraId = cameraManager!!.cameraIdList[0]
@@ -147,18 +145,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Synchronized
     private fun toggleFlash() {
             if (!hasFlash) {
                 Toast.makeText(this,"Selected Camera does not support Flash",Toast.LENGTH_SHORT).show()
                 return
             }
             flashMode = if (flashMode) {
-                btnColor.value = Color.Red
-                btnText.value = "OFF"
+                if (sosInterrupt) {
+                    btnColor.value = Color.Red
+                    btnText.value = "OFF"
+                }
                 false
             } else {
-                btnColor.value = Color.Green
-                btnText.value = "ON"
+                if (sosInterrupt) {
+                    btnColor.value = Color.Green
+                    btnText.value = "ON"
+                }
                 true
             }
             cameraManager?.setTorchMode(cameraId, flashMode)
@@ -178,6 +181,7 @@ class MainActivity : ComponentActivity() {
     private fun sosMode() {
         if (sosThread==null) {
             sosInterrupt=false
+            sosColor.value = Color.Green
             sosThread=Thread {
                 while (!sosInterrupt) {
                     try {
@@ -229,9 +233,14 @@ class MainActivity : ComponentActivity() {
             }
             sosThread?.start()
         } else {
-            sosInterrupt=true
-            sosThread?.interrupt()
-            sosThread=null
+            try {
+                sosInterrupt = true
+                sosThread?.interrupt()
+                sosThread = null
+                sosColor.value = Color.Red
+            } catch (e: Exception) {
+
+            }
         }
     }
 
@@ -240,6 +249,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        if (sosThread!=null) {
+            sosMode()
+        }
         if (flashMode) {
             cameraManager?.setTorchMode(cameraId,false)
         }

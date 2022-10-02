@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.thingsenz.flashlight"
-    android:versionCode="1"
-    android:versionName="1.00">
+    android:versionCode="2"
+    android:versionName="1.01">
 
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
 
     <uses-feature android:name="android.hardware.camera" android:required="true" />
